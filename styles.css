@@ -56,6 +56,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;heigh
 input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radius:50%;background:var(--accent);cursor:pointer}
 .sortsel{border:1px solid var(--line);background:#fff;border-radius:999px;padding:0 14px;font-size:.88rem;font-weight:600;color:var(--ink-2);min-height:44px;cursor:pointer}
 .result-count{font-size:.85rem;color:var(--ink-3);margin:14px 2px 0}
+.filter-search{display:none}
 .clear-filters{background:none;border:0;color:var(--accent);font-weight:700;font-size:.85rem;cursor:pointer;padding:10px;min-height:44px}
 
 /* ---------- recipe grid & cards ---------- */
@@ -115,8 +116,11 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 
 @media (max-width:760px){
   .recipe-cols{grid-template-columns:1fr}
-  .site-header{flex-wrap:wrap}
-  .header-search{flex:1 1 100%;order:3}
-  .filterbar{top:118px}
+  .site-header{flex-wrap:nowrap;padding:10px 16px}
+  .header-search{display:none}
+  .filter-search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:10px 16px;margin-bottom:12px;min-height:48px}
+  .filter-search svg{width:18px;height:18px;color:var(--ink-3);flex:none}
+  .filter-search input{border:0;outline:0;background:transparent;font-size:1rem;width:100%;color:var(--ink)}
+  .filterbar{position:static}
   .hero{padding:36px 0 22px}
 }

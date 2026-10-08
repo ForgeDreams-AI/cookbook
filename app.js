@@ -82,6 +82,10 @@ function homeHTML(){
   <h2 class="section-title">Browse by craving <span class="count">${RECIPES.length} recipes</span></h2>
   <div class="cat-grid">${catCards}</div>
   <div class="filterbar">
+    <div class="filter-search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z" fill="currentColor"/></svg>
+      <input id="qm" type="search" placeholder="Search recipes or ingredients…" autocomplete="off" aria-label="Search recipes" value="${esc(state.q)}">
+    </div>
     <div class="filter-row">
       <button class="chip" data-time="all" aria-pressed="${state.time==='all'}">Any time</button>
       <button class="chip" data-time="u30" aria-pressed="${state.time==='u30'}">Under 30 min</button>
@@ -151,18 +155,18 @@ function recipeHTML(r){
   </div>`;
 }
 
-function render(){
+function render(scroll){
   const params = new URLSearchParams(location.search);
   const slug = params.get('recipe');
   if (slug && bySlug[slug]){
     document.title = bySlug[slug].title + ' — The Master Cookbook';
     app.innerHTML = recipeHTML(bySlug[slug]);
-    window.scrollTo(0,0);
+    if (scroll !== false) window.scrollTo(0,0);
     bindRecipe();
   } else {
     document.title = 'The Master Cookbook';
     app.innerHTML = homeHTML();
-    window.scrollTo(0,0);
+    if (scroll !== false) window.scrollTo(0,0);
     bindHome();
   }
 }
@@ -183,9 +187,11 @@ function bindHome(){
     state.maxMains = parseInt(slider.value, 10);
     $('#mainsOut').textContent = state.maxMains >= MAXMAINS ? 'Any number' : '≤ ' + state.maxMains;
     clearTimeout(slider._t);
-    slider._t = setTimeout(render, 250);
+    slider._t = setTimeout(() => render(false), 250);
   });
   $('#sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
+  const qm = $('#qm');
+  if (qm) qm.addEventListener('input', handleSearch);
 }
 
 function bindRecipe(){
@@ -210,17 +216,25 @@ function toast(msg){
 }
 
 window.addEventListener('popstate', render);
-$('#q').addEventListener('input', e => {
+function handleSearch(e){
   state.q = e.target.value;
-  clearTimeout($('#q')._t);
-  $('#q')._t = setTimeout(() => {
-    if (new URLSearchParams(location.search).get('recipe')) go('./');
-    else render();
+  const other = document.getElementById(e.target.id === 'q' ? 'qm' : 'q');
+  if (other && other.value !== state.q) other.value = state.q;
+  clearTimeout(handleSearch._t);
+  const srcId = e.target.id;
+  handleSearch._t = setTimeout(() => {
+    if (new URLSearchParams(location.search).get('recipe')) { go('./'); }
+    else { render(false); }
+    if (srcId === 'qm'){
+      const nqm = document.getElementById('qm');
+      if (nqm){ nqm.focus({preventScroll:true}); const L = nqm.value.length; try{ nqm.setSelectionRange(L,L); }catch(_){} }
+    }
   }, 300);
-});
+}
+$('#q').addEventListener('input', handleSearch);
 document.querySelector('[data-nav]').addEventListener('click', e => {
   e.preventDefault(); state.q=''; state.cat=null; state.time='all'; state.maxMains=MAXMAINS; state.sort='featured';
-  $('#q').value=''; go('./');
+  $('#q').value=''; const qm=$('#qm'); if(qm) qm.value=''; go('./');
 });
 
 render();
